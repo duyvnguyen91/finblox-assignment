@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+#apiVersion: apps/v1beta1 # done for K8S version > 1.16
+kind: Deployment
+metadata:
+  name: $CI_PROJECT_NAME
+  namespace: $NAMESPACE
+spec:
+  selector:
+    matchLabels:
+      app: $CI_PROJECT_NAME
+  replicas: 1 # deployment runs 1 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: $CI_PROJECT_NAME
+    spec:
+      containers:
+      - name: $CI_PROJECT_NAME
+        image: karthequian/helloworld:latest
+        ports:
+        - containerPort: 80 #Endpoint is at port 80 in the container
+        resources:
+            requests:
+              memory: "200Mi"
+            limits:
+              cpu: "0.5"
+              memory: "400Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-k8s-service
+  namespace: $NAMESPACE
+spec:
+  type: ClusterIP #Exposes the service as a node port
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: $CI_PROJECT_NAME
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: public-nginx
+  name: $CI_PROJECT_NAME
+  namespace: $NAMESPACE
+spec:
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - backend:
+              serviceName: $CI_PROJECT_NAME
+              servicePort: 80
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+    - hosts:
+        - www.example.com
+      # secretName: example-tls
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: $CI_PROJECT_NAME
+  namespace: $NAMESPACE
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: $CI_PROJECT_NAME
+  minReplicas: 1
+  maxReplicas: 2
+  metrics: 
+  - type: Resource 
+    resource: 
+      name: memory 
+      targetAverageValue: 300Mi

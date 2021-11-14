@@ -6,10 +6,6 @@ variables:
   HOST: abc.xyz
   GIT_UBMODULE_STRATEGY: recursive
   GIT_STRATEGY: clone
-  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
-  SECRET_KEY: <a random character string>
-  FLASK_CONFIG: development
-  DATABASE_URL: postgresql://postgres:postgres@recipes-db.ckcejaos8w8c.ap-southeast-1.rds.amazonaws.com:5432/recipe_db
   DOCKER_DRIVER: overlay
 
 # Before Script for every job
@@ -34,23 +30,12 @@ stages:
   - deploy
 
 # Build docker image
-build image:
-  stage: build
-  tags:
-    - wecycle-runner
-  script: |
-    docker-build
-
-# Deploy deployment to EC2 instance with docker-compose
-deploy recipes ec2:
-  when: manual
-  stage: deploy
-  tags:
-    - wecycle-runner
-  script:
-    - envsubst < docker-compose.tpl.yml > docker-compose.yml
-    - docker-compose up -d
-    - docker image prune -f
+# build image:
+#   stage: build
+#   tags:
+#     - wecycle-runner
+#   script: |
+#     docker-build
 
 # Deploy deployment to EKS cluster
 deploy recipes eks:
@@ -61,7 +46,7 @@ deploy recipes eks:
   variables:
     NAMESPACE: default
   script: |
-    aws eks --region ap-southeast-1 update-kubeconfig --name basic-cluster
+    aws eks --region ap-southeast-1 update-kubeconfig --name duynv-cluster
     cd k8s && bash deploy.sh
 
 # Dont mind the runner name, I re-use the runner of my previous project
