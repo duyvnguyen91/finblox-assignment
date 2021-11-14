@@ -30,3 +30,6 @@ kubectl create secret generic mysecret --dry-run=client --from-literal=password=
 ```bash
 kubectl apply -f mysealedsecret.json
 ```
+
+## Helloworld K8s
+Use this domain to access: https://hello.duynv.info
