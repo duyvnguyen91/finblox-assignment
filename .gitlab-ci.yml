@@ -43,6 +43,7 @@ create secret:
   tags:
     - wecycle-runner
   script: |
+    aws eks --region ap-southeast-1 update-kubeconfig --name duynv-cluster
     cd k8s && kubectl apply -f sealed-secret.yaml
 
 # Deploy deployment to EKS cluster
