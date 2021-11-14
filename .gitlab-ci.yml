@@ -40,6 +40,7 @@ stages:
 # Deploy deployment to EKS cluster
 deploy recipes eks:
   when: manual
+  allow_failure: false
   stage: deploy
   tags:
     - wecycle-runner
