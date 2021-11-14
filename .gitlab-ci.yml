@@ -1,5 +1,5 @@
 # My deployer image to be ran for stage job
-image: vietduy0509/deployer:v1.0
+image: vietduy0509/deployer:v1.1
 
 variables:
   SERVICE_PATH: /recipes
@@ -43,7 +43,7 @@ create secret:
   tags:
     - wecycle-runner
   script: |
-    cd k8s && kubeseal < secret.yml > sealed-secret.yaml && kubectl apply -f sealed-secret.yaml
+    cd k8s && kubectl apply -f sealed-secret.yaml
 
 # Deploy deployment to EKS cluster
 deploy recipes eks:
